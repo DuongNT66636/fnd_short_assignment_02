@@ -10,14 +10,24 @@
  * @param {Array}  lines  the order lines the customer is sending back
  * @returns {object} the new return request
  */
+function filterReturnableLines(lines) {
+  const returnableLines = lines.filter((line) => !line.finalClearance);
+  if (returnableLines.length === 0) {
+    throw new Error('cannot open a return: all lines are final clearance');
+  }
+  return returnableLines;
+}
+
 function openReturn(order, lines) {
   if (lines.length === 0) {
     throw new Error('a return must cover at least one line');
   }
 
+  const returnableLines = filterReturnableLines(lines);
+
   return {
     orderId: order.id,
-    lines,
+    lines: returnableLines,
     raisedAt: new Date().toISOString(),
     approvedBy: null,
     approvedAt: null,
