@@ -2,6 +2,7 @@
 //
 // A return covers one or more lines of an order. A refund against it must be
 // approved by a refunds clerk before any money moves.
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 /**
  * Open a return request against an order.
@@ -18,7 +19,7 @@ function openReturn(order, lines, now = new Date()) {
   if (order.deliveredAt) {
     const deliveredAt = new Date(order.deliveredAt);
     const diffMs = now - deliveredAt;
-    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    const diffDays = diffMs / MS_PER_DAY;
 
     if (diffDays > 30) {
       throw new Error(
