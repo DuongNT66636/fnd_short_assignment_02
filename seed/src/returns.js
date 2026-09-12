@@ -4,6 +4,16 @@
 // approved by a refunds clerk before any money moves.
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
+function filterReturnableLines(lines) {
+  const returnableLines = lines.filter((line) => !line.finalClearance);
+
+  if (returnableLines.length === 0) {
+    throw new Error('cannot open a return: all lines are final clearance');
+  }
+
+  return returnableLines;
+}
+
 /**
  * Open a return request against an order.
  *
@@ -15,6 +25,10 @@ function openReturn(order, lines, now = new Date()) {
   if (lines.length === 0) {
     throw new Error('a return must cover at least one line');
   }
+
+  // Keep both policies: clearance controls eligible lines, while the
+  // delivery window controls whether the return can still be opened.
+  const returnableLines = filterReturnableLines(lines);
 
   if (order.deliveredAt) {
     const deliveredAt = new Date(order.deliveredAt);
@@ -30,7 +44,7 @@ function openReturn(order, lines, now = new Date()) {
 
   return {
     orderId: order.id,
-    lines,
+    lines: returnableLines,
     raisedAt: now.toISOString(),
     approvedBy: null,
     approvedAt: null,
