@@ -10,27 +10,27 @@
  * @param {Array}  lines  the order lines the customer is sending back
  * @returns {object} the new return request
  */
-function openReturn(order, lines) {
+function openReturn(order, lines, now = new Date()) {
   if (lines.length === 0) {
     throw new Error('a return must cover at least one line');
   }
 
   if (order.deliveredAt) {
     const deliveredAt = new Date(order.deliveredAt);
-    const now = new Date();
-
     const diffMs = now - deliveredAt;
     const diffDays = diffMs / (1000 * 60 * 60 * 24);
 
     if (diffDays > 30) {
-      throw new Error('return refused: outside the 30-day return window');
+      throw new Error(
+        'return refused: outside the 30-day return window'
+      );
     }
   }
 
   return {
     orderId: order.id,
     lines,
-    raisedAt: new Date().toISOString(),
+    raisedAt: now.toISOString(),
     approvedBy: null,
     approvedAt: null,
   };
